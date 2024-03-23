@@ -15,7 +15,9 @@ Features:
 
 # Example usage
 
-_Insert video here when I do it_
+An example of work can be seen in this [video](https://youtu.be/hk3BCiMDQDs)
+
+[![video](https://img.youtube.com/vi/hk3BCiMDQDs/0.jpg)](https://www.youtube.com/watch?v=hk3BCiMDQDs)
 
 # Installation
 
