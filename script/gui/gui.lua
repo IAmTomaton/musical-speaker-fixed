@@ -62,7 +62,8 @@ function ____exports.create(player)
             direction = "vertical"
         }
     ).content
-    gui.enabledConditionSelect = CircuitConditionSelectElement.create(circuitNetworkPanel)
+    gui.enabledConditionSelect = CircuitConditionSelectElement.create(circuitNetworkPanel, "gui-control-behavior-modes-guis.enabled-condition")
+    gui.resetConditionSelect = CircuitConditionSelectElement.create(circuitNetworkPanel, "musical-speaker.reset-condition")
     local soundSelectPanel = GuiToolkit.panel({parent = circuitNetworkPanel, direction = "horizontal"}).content
     gui.categorySelect = soundSelectPanel.add(
         {
@@ -131,7 +132,18 @@ function writeSettingsToSpeaker(gui)
     if not gui.speaker then
         error("Tried to write to nothing!", 0)
     end
-    MusicalSpeaker.setSettings(gui.speaker, {volume = gui.volumeSlider.slider_value, enabledCondition = {first_signal = gui.enabledConditionSelect.firstSignalChooser.elem_value, comparator = ">", constant = 0}, categoryId = gui.categorySelect.selected_index - 1, instrumentId = gui.instrumentSelect.selected_index - 1, noteId = gui.noteSelect.selected_index - 1, volumeControlSignal = gui.volumeControlSelect.elem_value, categoryIdControlSignal = gui.categoryIdControlSelect.elem_value, instrumentIdControlSignal = gui.instrumentIdControlSelect.elem_value, noteIdControlSignal = gui.noteIdControlSelect.elem_value})
+    MusicalSpeaker.setSettings(gui.speaker, {
+		volume = gui.volumeSlider.slider_value,
+		enabledCondition = {first_signal = gui.enabledConditionSelect.firstSignalChooser.elem_value, comparator = ">", constant = 0},
+		resetControlSignal = gui.resetConditionSelect.firstSignalChooser.elem_value,
+		categoryId = gui.categorySelect.selected_index - 1,
+		instrumentId = gui.instrumentSelect.selected_index - 1,
+		noteId = gui.noteSelect.selected_index - 1,
+		volumeControlSignal = gui.volumeControlSelect.elem_value,
+		categoryIdControlSignal = gui.categoryIdControlSelect.elem_value,
+		instrumentIdControlSignal = gui.instrumentIdControlSelect.elem_value,
+		noteIdControlSignal = gui.noteIdControlSelect.elem_value
+	})
 end
 function readSettingsFromSpeaker(gui)
     if not gui.speaker then
@@ -140,6 +152,7 @@ function readSettingsFromSpeaker(gui)
     local settings = MusicalSpeaker.refreshSettings(gui.speaker)
     gui.volumeSlider.slider_value = settings.volume
     gui.enabledConditionSelect.firstSignalChooser.elem_value = settings.enabledCondition.first_signal
+    gui.resetConditionSelect.firstSignalChooser.elem_value = settings.resetControlSignal
     gui.volumeControlSelect.elem_value = settings.volumeControlSignal
     gui.categoryIdControlSelect.elem_value = settings.categoryIdControlSignal
     gui.categorySelect.selected_index = settings.categoryId + 1

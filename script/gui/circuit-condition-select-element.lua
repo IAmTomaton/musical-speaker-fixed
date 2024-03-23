@@ -17,9 +17,9 @@ ConditionComparator[ConditionComparator.LESS_THAN_OR_EQUAL_TO] = "LESS_THAN_OR_E
 ConditionComparator.NOT_EQUAL_TO = 6
 ConditionComparator[ConditionComparator.NOT_EQUAL_TO] = "NOT_EQUAL_TO"
 local comparatorStrings = {"<", ">", "=", "≥", "≤", "≠"}
-function ____exports.create(parent)
+function ____exports.create(parent, name)
     local element = {}
-    local panel = GuiToolkit.labelledPanel({parent = parent, caption = {"gui-control-behavior-modes-guis.enabled-condition"}}).content
+    local panel = GuiToolkit.labelledPanel({parent = parent, caption = {name}}).content
     panel.style.vertical_align = "center"
     element.firstSignalChooser = panel.add({type = "choose-elem-button", elem_type = "signal"})
     element.comparatorChooser = panel.add({type = "drop-down", items = comparatorStrings, selected_index = 2, style = "circuit_condition_comparator_dropdown"})

@@ -42,6 +42,7 @@ function readSettings(combinator)
             comparator = ">",
             constant = 0
         },
+        resetControlSignal = unescapeSignal(m[CombinatorSlot.RESET_CONTROL_SIGNAL].signal),
         categoryId = getCountOrDefault(CombinatorSlot.CATEGORY_ID, 0),
         categoryIdControlSignal = unescapeSignal(m[CombinatorSlot.CATEGORY_ID_CONTROL_SIGNAL].signal),
         instrumentId = getCountOrDefault(CombinatorSlot.INSTRUMENT_ID, 0),
@@ -82,6 +83,11 @@ function ____exports.setSettings(speaker, settings)
         {
             index = CombinatorSlot.ENABLED_FIRST_SIGNAL,
             signal = escapeSignal(settings.enabledCondition.first_signal or EMPTY_SIGNAL),
+            count = 0
+        },
+        {
+            index = CombinatorSlot.RESET_CONTROL_SIGNAL,
+            signal = escapeSignal(settings.resetControlSignal or EMPTY_SIGNAL),
             count = 0
         },
         {index = CombinatorSlot.CATEGORY_ID, signal = {type = "virtual", name = "signal-C"}, count = settings.categoryId},
@@ -170,16 +176,15 @@ function onBuilt(args)
     end
 end
 function checkCircuitSignals(args)
-	local profiler = game.create_profiler()
-	profiler.restart()
-	local updateCount = 0
-	local stopCount = 0
     for speakerId, speaker in pairs(global.speakers) do
         if speaker and speaker.notePlayer and speaker.notePlayer.entity.valid then
 			local currentlyPlaying = speaker.notePlayer.controlBehavior.circuit_condition.fulfilled
 			if currentlyPlaying then
-				local changed = speaker.combinator.get_merged_signal({type = "virtual", name = "signal-red"}) > 0
+				local changed = false
 				local settings = speaker.settings
+				if settings.resetControlSignal and settings.resetControlSignal.name then
+					changed = (speaker.combinator.get_merged_signal(settings.resetControlSignal) or 0) > 0
+				end
 				local newSettings = {}
 				if settings.volumeControlSignal and settings.volumeControlSignal.name then
 					local volume = speaker.combinator.get_merged_signal(settings.volumeControlSignal) or 100
@@ -209,10 +214,8 @@ function checkCircuitSignals(args)
 						changed = true
 					end
 				end
-
 				
 				if not speaker.isPlaying or changed then
-					updateCount = updateCount + 1
 					____exports.setSettings(
 						speaker,
 						settings
@@ -222,11 +225,9 @@ function checkCircuitSignals(args)
 			elseif speaker.isPlaying then
 				speaker.isPlaying = false
 				____exports.reset(speaker)
-				stopCount = stopCount + 1
 			end
         end
     end
-	profiler.stop()
 end
 function onEntitySettingsPasted(args)
     if args.destination.unit_number then
@@ -256,6 +257,8 @@ CombinatorSlot.INSTRUMENT_ID_CONTROL_SIGNAL = 11
 CombinatorSlot[CombinatorSlot.INSTRUMENT_ID_CONTROL_SIGNAL] = "INSTRUMENT_ID_CONTROL_SIGNAL"
 CombinatorSlot.NOTE_ID_CONTROL_SIGNAL = 12
 CombinatorSlot[CombinatorSlot.NOTE_ID_CONTROL_SIGNAL] = "NOTE_ID_CONTROL_SIGNAL"
+CombinatorSlot.RESET_CONTROL_SIGNAL = 13
+CombinatorSlot[CombinatorSlot.RESET_CONTROL_SIGNAL] = "RESET_CONTROL_SIGNAL"
 EMPTY_SIGNAL = {type = "item", name = nil}
 function ____exports.registerEvents()
     Event.register({defines.events.on_built_entity, defines.events.on_robot_built_entity, defines.events.script_raised_built, defines.events.on_entity_cloned, defines.events.script_raised_revive}, onBuilt)
