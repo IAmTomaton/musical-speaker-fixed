@@ -9,7 +9,7 @@ local speaker = __TS__ObjectAssign(
     {
         type = "constant-combinator",
         name = "musical-speaker",
-        icon = "__musical-speaker__/graphics/icons/musical-speaker.png",
+        icon = "__musical-speaker-fixed__/graphics/icons/musical-speaker.png",
         flags = {
             table.unpack(
                 __TS__ArrayConcat(

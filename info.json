@@ -1,10 +1,10 @@
 {
-    "name": "musical-speaker",
-    "version": "1.0.1",
-    "title": "Musical speaker",
-    "author": "Mooeing-747",
+    "name": "musical-speaker-fixed",
+    "version": "1.0.0",
+    "title": "Musical speaker fixed",
+    "author": "_Juggernaut_",
     "factorio_version": "1.1",
     "dependencies": ["base >= 1.0", "stdlib"],
-    "description": "Adds a speaker to the game that includes 189 instruments for use in music production."
+    "description": "Adds a speaker to the game that includes 189 instruments for use in music production. Fixed and expanded version of the original Musical speaker."
 }
 	

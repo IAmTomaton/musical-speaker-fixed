@@ -84,6 +84,31 @@ function ____exports.create(player)
         }
     ).content
     gui.volumeControlSelect = volumeFromCircuitPanel.add({type = "choose-elem-button", elem_type = "signal"})
+	
+    local categoryIdFromCircuitPanel = GuiToolkit.labelledPanel(
+        {
+            parent = circuitNetworkPanel,
+            caption = L("musical-speaker.categoryId-control-condition")
+        }
+    ).content
+    gui.categoryIdControlSelect = categoryIdFromCircuitPanel.add({type = "choose-elem-button", elem_type = "signal"})
+	
+    local instrumentIdFromCircuitPanel = GuiToolkit.labelledPanel(
+        {
+            parent = circuitNetworkPanel,
+            caption = L("musical-speaker.instrumentId-control-condition")
+        }
+    ).content
+    gui.instrumentIdControlSelect = instrumentIdFromCircuitPanel.add({type = "choose-elem-button", elem_type = "signal"})
+	
+    local noteIdFromCircuitPanel = GuiToolkit.labelledPanel(
+        {
+            parent = circuitNetworkPanel,
+            caption = L("musical-speaker.noteId-control-condition")
+        }
+    ).content
+    gui.noteIdControlSelect = noteIdFromCircuitPanel.add({type = "choose-elem-button", elem_type = "signal"})
+	
     return gui
 end
 function ____exports.updateNoteSelectOptions(gui)
@@ -106,7 +131,7 @@ function writeSettingsToSpeaker(gui)
     if not gui.speaker then
         error("Tried to write to nothing!", 0)
     end
-    MusicalSpeaker.setSettings(gui.speaker, {volume = gui.volumeSlider.slider_value, enabledCondition = {first_signal = gui.enabledConditionSelect.firstSignalChooser.elem_value}, categoryId = gui.categorySelect.selected_index - 1, instrumentId = gui.instrumentSelect.selected_index - 1, noteId = gui.noteSelect.selected_index - 1, volumeControlSignal = gui.volumeControlSelect.elem_value})
+    MusicalSpeaker.setSettings(gui.speaker, {volume = gui.volumeSlider.slider_value, enabledCondition = {first_signal = gui.enabledConditionSelect.firstSignalChooser.elem_value, comparator = ">", constant = 0}, categoryId = gui.categorySelect.selected_index - 1, instrumentId = gui.instrumentSelect.selected_index - 1, noteId = gui.noteSelect.selected_index - 1, volumeControlSignal = gui.volumeControlSelect.elem_value, categoryIdControlSignal = gui.categoryIdControlSelect.elem_value, instrumentIdControlSignal = gui.instrumentIdControlSelect.elem_value, noteIdControlSignal = gui.noteIdControlSelect.elem_value})
 end
 function readSettingsFromSpeaker(gui)
     if not gui.speaker then
@@ -116,10 +141,13 @@ function readSettingsFromSpeaker(gui)
     gui.volumeSlider.slider_value = settings.volume
     gui.enabledConditionSelect.firstSignalChooser.elem_value = settings.enabledCondition.first_signal
     gui.volumeControlSelect.elem_value = settings.volumeControlSignal
+    gui.categoryIdControlSelect.elem_value = settings.categoryIdControlSignal
     gui.categorySelect.selected_index = settings.categoryId + 1
     ____exports.updateNoteSelectOptions(gui)
+    gui.instrumentIdControlSelect.elem_value = settings.instrumentIdControlSignal
     gui.instrumentSelect.selected_index = settings.instrumentId + 1
     ____exports.updateNoteSelectOptions(gui)
+    gui.noteIdControlSelect.elem_value = settings.noteIdControlSignal
     gui.noteSelect.selected_index = settings.noteId + 1
 end
 function ____exports.open(gui, speaker)
@@ -173,10 +201,10 @@ function onGuiOpened(args)
     if args.entity and (args.entity.name == "musical-speaker") then
         local player = game.players[args.player_index]
         local gui = global.gui[args.player_index]
-        if not gui then
-            gui = ____exports.create(player)
-            global.gui[args.player_index] = gui
-        end
+        --if not gui then
+        gui = ____exports.create(player)
+        global.gui[args.player_index] = gui
+        --end
         local speaker = global.speakers[args.entity.unit_number]
         if not speaker then
             player.print("That's not a musical speaker!")

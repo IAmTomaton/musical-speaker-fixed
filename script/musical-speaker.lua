@@ -4,8 +4,6 @@ local ____exports = {}
 local ____sounds = require("script.sounds")
 local categories = ____sounds.categories
 local getProgrammableSpeakerInstrumentId = ____sounds.getProgrammableSpeakerInstrumentId
-local ____templates = require("script.templates")
-local getTemplate = ____templates.getTemplate
 local Event = require("__stdlib__/stdlib/event/event")
 local ____signal_2Descaping = require("script.signal-escaping")
 local escapeSignal = ____signal_2Descaping.escapeSignal
@@ -45,8 +43,11 @@ function readSettings(combinator)
             constant = 0
         },
         categoryId = getCountOrDefault(CombinatorSlot.CATEGORY_ID, 0),
+        categoryIdControlSignal = unescapeSignal(m[CombinatorSlot.CATEGORY_ID_CONTROL_SIGNAL].signal),
         instrumentId = getCountOrDefault(CombinatorSlot.INSTRUMENT_ID, 0),
-        noteId = getCountOrDefault(CombinatorSlot.NOTE_ID, 0)
+        instrumentIdControlSignal = unescapeSignal(m[CombinatorSlot.INSTRUMENT_ID_CONTROL_SIGNAL].signal),
+        noteId = getCountOrDefault(CombinatorSlot.NOTE_ID, 0),
+        noteIdControlSignal = unescapeSignal(m[CombinatorSlot.NOTE_ID_CONTROL_SIGNAL].signal),
     }
     if settings.categoryId >= #categories then
         settings.categoryId = 0
@@ -84,8 +85,23 @@ function ____exports.setSettings(speaker, settings)
             count = 0
         },
         {index = CombinatorSlot.CATEGORY_ID, signal = {type = "virtual", name = "signal-C"}, count = settings.categoryId},
-        {index = CombinatorSlot.INSTRUMENT_ID, signal = {type = "virtual", name = "signal-I"}, count = settings.instrumentId},
-        {index = CombinatorSlot.NOTE_ID, signal = {type = "virtual", name = "signal-N"}, count = settings.noteId}
+		{
+            index = CombinatorSlot.CATEGORY_ID_CONTROL_SIGNAL,
+            signal = escapeSignal(settings.categoryIdControlSignal or EMPTY_SIGNAL),
+            count = 0
+        },
+		{index = CombinatorSlot.INSTRUMENT_ID, signal = {type = "virtual", name = "signal-I"}, count = settings.instrumentId},
+		{
+            index = CombinatorSlot.INSTRUMENT_ID_CONTROL_SIGNAL,
+            signal = escapeSignal(settings.instrumentIdControlSignal or EMPTY_SIGNAL),
+            count = 0
+        },
+		{index = CombinatorSlot.NOTE_ID, signal = {type = "virtual", name = "signal-N"}, count = settings.noteId},
+		{
+            index = CombinatorSlot.NOTE_ID_CONTROL_SIGNAL,
+            signal = escapeSignal(settings.noteIdControlSignal or EMPTY_SIGNAL),
+            count = 0
+        },
     }
     local controlBehavior = speaker.controlBehavior
     controlBehavior.parameters = parameters
@@ -100,15 +116,15 @@ function ____exports.reset(speaker)
         speaker.notePlayer.entity.destroy()
     end
     speaker.isPlaying = false
-    local blueprint = getTemplate({globalPlayback = true, volume = speaker.settings.volume})
-    local ghosts = blueprint.build_blueprint({surface = speaker.combinator.surface, force = speaker.combinator.force, position = speaker.combinator.position})
-    if #ghosts ~= 1 then
-        error("This should be impossible", 0)
-    end
-    local _, notePlayer = ghosts[1].silent_revive()
-    if not notePlayer then
-        error("Failed to revive ghost", 0)
-    end
+	
+	local notePlayer = game.surfaces[speaker.combinator.surface_index].create_entity{
+		name = "musical-speaker-note-player",
+		position = speaker.combinator.position,
+		parameters = {allow_polyphony = false, playback_globally = true, playback_volume = speaker.settings.volume / 100},
+		alert_parameters = {alert_message = "", show_alert = false, show_on_map = true},
+		force = speaker.combinator.force
+	}
+	
     local controlBehavior = notePlayer.get_or_create_control_behavior()
     controlBehavior.circuit_condition = {condition = speaker.settings.enabledCondition}
     speaker.notePlayer = {entity = notePlayer, controlBehavior = controlBehavior}
@@ -154,33 +170,63 @@ function onBuilt(args)
     end
 end
 function checkCircuitSignals(args)
+	local profiler = game.create_profiler()
+	profiler.restart()
+	local updateCount = 0
+	local stopCount = 0
     for speakerId, speaker in pairs(global.speakers) do
-        if speaker then
-            if speaker.notePlayer then
-                local currentlyPlaying = speaker.notePlayer.controlBehavior.circuit_condition.fulfilled
-                if currentlyPlaying then
-                    if not speaker.isPlaying then
-                        local settings = speaker.settings
-                        if settings.volumeControlSignal and settings.volumeControlSignal.name then
-                            local volume = speaker.combinator.get_merged_signal(settings.volumeControlSignal) or 100
-                            if (volume ~= 0) and (settings.volume ~= volume) then
-                                ____exports.setSettings(
-                                    speaker,
-                                    __TS__ObjectAssign({}, settings, {volume = volume})
-                                )
-                            end
-                        end
-                        speaker.isPlaying = true
-                    end
-                elseif speaker.isPlaying then
-                    speaker.isPlaying = false
-                    if speaker.settings.categoryId ~= 16 then
-                        ____exports.reset(speaker)
-                    end
-                end
-            end
+        if speaker and speaker.notePlayer and speaker.notePlayer.entity.valid then
+			local currentlyPlaying = speaker.notePlayer.controlBehavior.circuit_condition.fulfilled
+			if currentlyPlaying then
+				local changed = speaker.combinator.get_merged_signal({type = "virtual", name = "signal-red"}) > 0
+				local settings = speaker.settings
+				local newSettings = {}
+				if settings.volumeControlSignal and settings.volumeControlSignal.name then
+					local volume = speaker.combinator.get_merged_signal(settings.volumeControlSignal) or 100
+					if (settings.volume ~= volume) then
+						settings.volume = volume
+						changed = true
+					end
+				end
+				if settings.categoryIdControlSignal and settings.categoryIdControlSignal.name then
+					local categoryId = speaker.combinator.get_merged_signal(settings.categoryIdControlSignal) or 0
+					if (settings.categoryId ~= categoryId) then
+						settings.categoryId = categoryId
+						changed = true
+					end
+				end
+				if settings.instrumentIdControlSignal and settings.instrumentIdControlSignal.name then
+					local instrumentId = speaker.combinator.get_merged_signal(settings.instrumentIdControlSignal) or 0
+					if (settings.instrumentId ~= instrumentId) then
+						settings.instrumentId = instrumentId
+						changed = true
+					end
+				end
+				if settings.noteIdControlSignal and settings.noteIdControlSignal.name then
+					local noteId = speaker.combinator.get_merged_signal(settings.noteIdControlSignal) or 0
+					if (settings.noteId ~= noteId) then
+						settings.noteId = noteId
+						changed = true
+					end
+				end
+
+				
+				if not speaker.isPlaying or changed then
+					updateCount = updateCount + 1
+					____exports.setSettings(
+						speaker,
+						settings
+					)
+					speaker.isPlaying = true
+				end
+			elseif speaker.isPlaying then
+				speaker.isPlaying = false
+				____exports.reset(speaker)
+				stopCount = stopCount + 1
+			end
         end
     end
+	profiler.stop()
 end
 function onEntitySettingsPasted(args)
     if args.destination.unit_number then
@@ -204,6 +250,12 @@ CombinatorSlot.INSTRUMENT_ID = 8
 CombinatorSlot[CombinatorSlot.INSTRUMENT_ID] = "INSTRUMENT_ID"
 CombinatorSlot.NOTE_ID = 9
 CombinatorSlot[CombinatorSlot.NOTE_ID] = "NOTE_ID"
+CombinatorSlot.CATEGORY_ID_CONTROL_SIGNAL = 10
+CombinatorSlot[CombinatorSlot.CATEGORY_ID_CONTROL_SIGNAL] = "CATEGORY_ID_CONTROL_SIGNAL"
+CombinatorSlot.INSTRUMENT_ID_CONTROL_SIGNAL = 11
+CombinatorSlot[CombinatorSlot.INSTRUMENT_ID_CONTROL_SIGNAL] = "INSTRUMENT_ID_CONTROL_SIGNAL"
+CombinatorSlot.NOTE_ID_CONTROL_SIGNAL = 12
+CombinatorSlot[CombinatorSlot.NOTE_ID_CONTROL_SIGNAL] = "NOTE_ID_CONTROL_SIGNAL"
 EMPTY_SIGNAL = {type = "item", name = nil}
 function ____exports.registerEvents()
     Event.register({defines.events.on_built_entity, defines.events.on_robot_built_entity, defines.events.script_raised_built, defines.events.on_entity_cloned, defines.events.script_raised_revive}, onBuilt)
