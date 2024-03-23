@@ -1,7 +1,7 @@
 --[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
 require("lualib_bundle");
 local ____exports = {}
-local categories = require("./sound-data")
+local categories = require("script.sound-data")
 local mapping = {}
 local programmableSpeakerInstruments = {}
 __TS__ArrayForEach(
