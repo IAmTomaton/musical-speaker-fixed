@@ -115,30 +115,37 @@ end
 function ____exports.updateNoteSelectOptions(gui)
     local selectedCategory = categories[gui.categorySelect.selected_index] or categories[1]
     local selectedInstrument = selectedCategory.instruments[gui.instrumentSelect.selected_index] or selectedCategory.instruments[1]
+	
     gui.instrumentSelect.items = __TS__ArrayMap(
         selectedCategory.instruments,
         function(____, instrument) return L(
             "musical-speaker-instrument." .. tostring(instrument.name)
         ) end
     )
+	gui.instrumentSelect.selected_index = gui.instrumentSelect.selected_index == 0 and 1 or gui.instrumentSelect.selected_index
+	
     gui.noteSelect.items = __TS__ArrayMap(
         selectedInstrument.notes,
         function(____, note) return L(
             "musical-speaker-note." .. tostring(note.name)
         ) end
     )
+	gui.noteSelect.selected_index = gui.noteSelect.selected_index == 0 and 1 or gui.noteSelect.selected_index
 end
 function writeSettingsToSpeaker(gui)
     if not gui.speaker then
         error("Tried to write to nothing!", 0)
     end
+	instrumentId = gui.instrumentSelect.selected_index == 0 and 1 or gui.instrumentSelect.selected_index
+	noteId = gui.noteSelect.selected_index == 0 and 1 or gui.noteSelect.selected_index
+	
     MusicalSpeaker.setSettings(gui.speaker, {
 		volume = gui.volumeSlider.slider_value,
 		enabledCondition = {first_signal = gui.enabledConditionSelect.firstSignalChooser.elem_value, comparator = ">", constant = 0},
 		resetControlSignal = gui.resetConditionSelect.firstSignalChooser.elem_value,
 		categoryId = gui.categorySelect.selected_index - 1,
-		instrumentId = gui.instrumentSelect.selected_index - 1,
-		noteId = gui.noteSelect.selected_index - 1,
+		instrumentId = instrumentId - 1,
+		noteId = noteId - 1,
 		volumeControlSignal = gui.volumeControlSelect.elem_value,
 		categoryIdControlSignal = gui.categoryIdControlSelect.elem_value,
 		instrumentIdControlSignal = gui.instrumentIdControlSelect.elem_value,
@@ -193,13 +200,15 @@ function onSliderValueChanged(gui, args)
     writeSettingsToSpeaker(gui)
 end
 function onSelectionChanged(gui, args)
-    writeSettingsToSpeaker(gui)
     ____exports.updateNoteSelectOptions(gui)
-    if args.element.index == gui.noteSelect.index then
+    writeSettingsToSpeaker(gui)
+    --[[
+	if args.element.index == gui.noteSelect.index then
         local note = categories[gui.categorySelect.selected_index].instruments[gui.instrumentSelect.selected_index].notes[gui.noteSelect.selected_index]
         if note and note.filename then
         end
     end
+	]]--
 end
 function onPlayerLeave(args)
     if global.gui[args.player_index] ~= nil then

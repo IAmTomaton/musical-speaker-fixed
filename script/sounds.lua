@@ -7,6 +7,7 @@ local programmableSpeakerInstruments = {}
 __TS__ArrayForEach(
     categories,
     function(____, category, categoryIndex)
+		mapping[categoryIndex] = {}
         __TS__ArrayForEach(
             category.instruments,
             function(____, instrument, instrumentIndex)
@@ -20,13 +21,28 @@ __TS__ArrayForEach(
                         )
                     }
                 )
-                mapping[(tostring(categoryIndex) .. "-") .. tostring(instrumentIndex)] = programmableSpeakerIndex - 1
+                mapping[categoryIndex][instrumentIndex] = programmableSpeakerIndex - 1
             end
         )
     end
 )
-function ____exports.getProgrammableSpeakerInstrumentId(categoryId, instrumentId)
-    return mapping[(tostring(categoryId) .. "-") .. tostring(instrumentId)]
+function ____exports.getProgrammableSpeakerInstrumentId(categoryId, instrumentId, noteId)
+	if mapping[categoryId] == nil then
+		game.print(string.format("Unknown category %d!", categoryId))
+		return mapping[0][0]
+	end
+	if mapping[categoryId][instrumentId] == nil then
+		game.print(string.format("Unknown instrument %d in category %d!", instrumentId, categoryId))
+		return mapping[categoryId][0]
+	end
+
+	programmableSpeakerInstrumentId = mapping[categoryId][instrumentId]
+	
+	if noteId >= #programmableSpeakerInstruments[programmableSpeakerInstrumentId].notes then
+		game.print(string.format("Unknown note %d in instrument %d in category %d!", noteId, instrumentId, categoryId))
+	end
+	
+	return programmableSpeakerInstrumentId
 end
 ____exports.categories = categories
 ____exports.programmableSpeakerInstruments = programmableSpeakerInstruments

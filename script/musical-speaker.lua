@@ -137,12 +137,8 @@ function ____exports.reset(speaker)
     notePlayer.destructible = false
     notePlayer.connect_neighbour({wire = defines.wire_type.red, target_entity = speaker.combinator})
     notePlayer.connect_neighbour({wire = defines.wire_type.green, target_entity = speaker.combinator})
-    local programmableSpeakerInstrument = getProgrammableSpeakerInstrumentId(speaker.settings.categoryId, speaker.settings.instrumentId)
-    if not programmableSpeakerInstrument then
-        game.print("Unknown instrument!")
-    else
-        controlBehavior.circuit_parameters = {signal_value_is_pitch = false, note_id = speaker.settings.noteId, instrument_id = programmableSpeakerInstrument}
-    end
+    local programmableSpeakerInstrument = getProgrammableSpeakerInstrumentId(speaker.settings.categoryId, speaker.settings.instrumentId, speaker.settings.noteId)
+	controlBehavior.circuit_parameters = {signal_value_is_pitch = false, note_id = speaker.settings.noteId, instrument_id = programmableSpeakerInstrument}
 end
 function ____exports.destroy(speaker)
     if speaker.notePlayer and speaker.notePlayer.entity.valid then
@@ -186,30 +182,46 @@ function checkCircuitSignals(args)
 					changed = (speaker.combinator.get_merged_signal(settings.resetControlSignal) or 0) > 0
 				end
 				local newSettings = {}
+				
 				if settings.volumeControlSignal and settings.volumeControlSignal.name then
 					local volume = speaker.combinator.get_merged_signal(settings.volumeControlSignal) or 100
-					if (settings.volume ~= volume) then
+					if (volume < 0) then
+						game.print(string.format("Volume cannot be negative %d!", volume))
+					end
+					if (volume >= 0 and settings.volume ~= volume) then
 						settings.volume = volume
 						changed = true
 					end
 				end
+				
 				if settings.categoryIdControlSignal and settings.categoryIdControlSignal.name then
 					local categoryId = speaker.combinator.get_merged_signal(settings.categoryIdControlSignal) or 0
-					if (settings.categoryId ~= categoryId) then
+					if (categoryId < 0) then
+						game.print(string.format("Category cannot be negative %d!", categoryId))
+					end
+					if (categoryId >= 0 and settings.categoryId ~= categoryId) then
 						settings.categoryId = categoryId
 						changed = true
 					end
 				end
+				
 				if settings.instrumentIdControlSignal and settings.instrumentIdControlSignal.name then
 					local instrumentId = speaker.combinator.get_merged_signal(settings.instrumentIdControlSignal) or 0
-					if (settings.instrumentId ~= instrumentId) then
+					if (instrumentId < 0) then
+						game.print(string.format("Instrument cannot be negative %d!", instrumentId))
+					end
+					if (instrumentId >= 0 and settings.instrumentId ~= instrumentId) then
 						settings.instrumentId = instrumentId
 						changed = true
 					end
 				end
+				
 				if settings.noteIdControlSignal and settings.noteIdControlSignal.name then
 					local noteId = speaker.combinator.get_merged_signal(settings.noteIdControlSignal) or 0
-					if (settings.noteId ~= noteId) then
+					if (noteId < 0) then
+						game.print(string.format("Note cannot be negative %d!", noteId))
+					end
+					if (noteId >= 0 and settings.noteId ~= noteId) then
 						settings.noteId = noteId
 						changed = true
 					end
