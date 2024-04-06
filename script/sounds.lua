@@ -38,7 +38,7 @@ function ____exports.getProgrammableSpeakerInstrumentId(categoryId, instrumentId
 
 	programmableSpeakerInstrumentId = mapping[categoryId][instrumentId]
 	
-	if noteId >= #programmableSpeakerInstruments[programmableSpeakerInstrumentId].notes then
+	if noteId >= #programmableSpeakerInstruments[programmableSpeakerInstrumentId + 1].notes then
 		game.print(string.format("Unknown note %d in instrument %d in category %d!", noteId, instrumentId, categoryId))
 	end
 	
