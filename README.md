@@ -23,7 +23,7 @@ An example of work can be seen in this [video](https://youtu.be/hk3BCiMDQDs)
 
 The size of the mod's source sound files is too large for the mod portal, so the mod will be hosted there with only one musical instrument.
 - If you want to use your sound files, then place them in the mod folder and write the paths to them in the `script/sound-data.lua` file.
-- If you want to use all the sounds from the parent mod, then download the mod release from [github](https://github.com/IAmTomaton/musical-speaker-fixed/releases/tag/v1.0.0).
+- If you want to use all the sounds from the parent mod, then download the mod release from [github](https://github.com/IAmTomaton/musical-speaker-fixed/releases/tag/v1.0.2).
 
 # Caveats
 - For right now, enabled and reset condition comparison is limited to `> 0`.
