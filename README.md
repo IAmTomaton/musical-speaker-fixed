@@ -9,6 +9,7 @@ Features:
 - Control volume, category, instrument and note via circuit network.
 - The settings can be set at any time, while the original can only set during the tick when a note starts playing.
 - The reset setting allows you to restart sound playback without disable the speaker.
+- A fairly convenient system for loading user sounds.
 - Some bugs fixed.
 
 ![](./images/img1.jpg)
@@ -21,9 +22,13 @@ An example of work can be seen in this [video](https://youtu.be/hk3BCiMDQDs)
 
 # Installation
 
-The size of the mod's source sound files is too large for the mod portal, so the mod will be hosted there with only one musical instrument.
-- If you want to use your sound files, then place them in the mod folder and write the paths to them in the `script/sound-data.lua` file.
-- If you want to use all the sounds from the parent mod, then download the mod release from [github](https://github.com/IAmTomaton/musical-speaker-fixed/releases/tag/v1.0.2).
+**Installing the main mod**<br>
+Go to the latest release and download the attached mod archive `musical-speaker-fixed_n.n.n.zip`. Place the mod archive in your mods directory, eg `%appdata%\factorio\mods`. **The main mod does not contain sound files**.
+
+**Installing user sounds**<br>
+The main mod does not contain any sound files. Sound files are loaded using additional mods. The template for such a mod can be found in the folder [`sound-data-mod-template`](https://github.com/IAmTomaton/musical-speaker-fixed/tree/main/sound-data-mod-template).
+You can download the mod archive containing all the sounds of the original `musical-speaker` mod from this [release](https://github.com/IAmTomaton/musical-speaker-fixed/releases/tag/v1.0.3).
+Installing a sound mod is similar to installing the main mod.
 
 # Caveats
 - For right now, enabled and reset condition comparison is limited to `> 0`.
