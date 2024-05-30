@@ -26,7 +26,8 @@ An example of work can be seen in this [video](https://youtu.be/hk3BCiMDQDs)
 Go to the latest release and download the attached mod archive `musical-speaker-fixed_n.n.n.zip`. Place the mod archive in your mods directory, eg `%appdata%\factorio\mods`. **The main mod does not contain sound files**.
 
 **Installing user sounds**<br>
-The main mod does not contain any sound files. Sound files are loaded using additional mods. The template for such a mod can be found in the folder [`sound-data-mod-template`](https://github.com/IAmTomaton/musical-speaker-fixed/tree/main/sound-data-mod-template).
+The main mod does not contain any sound files. Sound files are loaded using additional mods. The template for such a mod can be found in the folder [sound-data-mod-template](https://github.com/IAmTomaton/musical-speaker-fixed/tree/main/sound-data-mod-template).
+Place the sound files in the mod folder, for example the `sounds` folder. In the `sound-data.lua` file, fill the table with your data in accordance with the specified format.<br>
 You can download the mod archive containing all the sounds of the original `musical-speaker` mod from this [release](https://github.com/IAmTomaton/musical-speaker-fixed/releases/tag/v1.0.3).
 Installing a sound mod is similar to installing the main mod.
 
