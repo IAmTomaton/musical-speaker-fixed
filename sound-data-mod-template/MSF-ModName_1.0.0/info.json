@@ -1,0 +1,10 @@
+{
+    "name": "MSF-ModName",
+    "version": "1.0.0",
+    "title": "Template for mod with sounds for musical speaker fixed",
+    "author": "_Juggernaut_",
+    "factorio_version": "1.1",
+    "dependencies": ["base >= 1.0", "stdlib", "musical-speaker-fixed >= 1.0.2"],
+    "description": "Template for mod with sounds for musical speaker fixed"
+}
+	
