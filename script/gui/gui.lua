@@ -113,8 +113,19 @@ function ____exports.create(player)
     return gui
 end
 function ____exports.updateNoteSelectOptions(gui)
+	if #categories == 0 then
+		return
+	end
     local selectedCategory = categories[gui.categorySelect.selected_index] or categories[1]
+	
+	if #selectedCategory.instruments == 0 then
+		return
+	end
     local selectedInstrument = selectedCategory.instruments[gui.instrumentSelect.selected_index] or selectedCategory.instruments[1]
+	
+	if #selectedInstrument.notes == 0 then
+		return
+	end
 	
     gui.instrumentSelect.items = __TS__ArrayMap(
         selectedCategory.instruments,
@@ -136,6 +147,7 @@ function writeSettingsToSpeaker(gui)
     if not gui.speaker then
         error("Tried to write to nothing!", 0)
     end
+	categoryId = gui.categorySelect.selected_index == 0 and 1 or gui.categorySelect.selected_index
 	instrumentId = gui.instrumentSelect.selected_index == 0 and 1 or gui.instrumentSelect.selected_index
 	noteId = gui.noteSelect.selected_index == 0 and 1 or gui.noteSelect.selected_index
 	
@@ -143,7 +155,7 @@ function writeSettingsToSpeaker(gui)
 		volume = gui.volumeSlider.slider_value,
 		enabledCondition = {first_signal = gui.enabledConditionSelect.firstSignalChooser.elem_value, comparator = ">", constant = 0},
 		resetControlSignal = gui.resetConditionSelect.firstSignalChooser.elem_value,
-		categoryId = gui.categorySelect.selected_index - 1,
+		categoryId = categoryId - 1,
 		instrumentId = instrumentId - 1,
 		noteId = noteId - 1,
 		volumeControlSignal = gui.volumeControlSelect.elem_value,
@@ -161,14 +173,23 @@ function readSettingsFromSpeaker(gui)
     gui.enabledConditionSelect.firstSignalChooser.elem_value = settings.enabledCondition.first_signal
     gui.resetConditionSelect.firstSignalChooser.elem_value = settings.resetControlSignal
     gui.volumeControlSelect.elem_value = settings.volumeControlSignal
+	
     gui.categoryIdControlSelect.elem_value = settings.categoryIdControlSignal
-    gui.categorySelect.selected_index = settings.categoryId + 1
+    if #gui.categorySelect.items >= settings.categoryId + 1 then
+		gui.categorySelect.selected_index = settings.categoryId + 1
+	end
     ____exports.updateNoteSelectOptions(gui)
+	
     gui.instrumentIdControlSelect.elem_value = settings.instrumentIdControlSignal
-    gui.instrumentSelect.selected_index = settings.instrumentId + 1
+	if #gui.instrumentSelect.items >= settings.instrumentId + 1 then
+		gui.instrumentSelect.selected_index = settings.instrumentId + 1
+	end
     ____exports.updateNoteSelectOptions(gui)
+	
     gui.noteIdControlSelect.elem_value = settings.noteIdControlSignal
-    gui.noteSelect.selected_index = settings.noteId + 1
+	if #gui.noteSelect.items >= settings.noteId + 1 then
+		gui.noteSelect.selected_index = settings.noteId + 1
+	end
 end
 function ____exports.open(gui, speaker)
     gui.speaker = speaker
@@ -202,13 +223,6 @@ end
 function onSelectionChanged(gui, args)
     ____exports.updateNoteSelectOptions(gui)
     writeSettingsToSpeaker(gui)
-    --[[
-	if args.element.index == gui.noteSelect.index then
-        local note = categories[gui.categorySelect.selected_index].instruments[gui.instrumentSelect.selected_index].notes[gui.noteSelect.selected_index]
-        if note and note.filename then
-        end
-    end
-	]]--
 end
 function onPlayerLeave(args)
     if global.gui[args.player_index] ~= nil then

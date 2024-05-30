@@ -53,10 +53,13 @@ function readSettings(combinator)
     if settings.categoryId >= #categories then
         settings.categoryId = 0
     end
-    if settings.instrumentId >= #categories[settings.categoryId + 1].instruments then
+	
+    if #categories == 0 or settings.instrumentId >= #categories[settings.categoryId + 1].instruments then
         settings.instrumentId = 0
     end
-    if settings.noteId >= #categories[settings.categoryId + 1].instruments[settings.instrumentId + 1].notes then
+	
+    if  #categories == 0 or #categories[settings.categoryId + 1].instruments == 0 or
+		settings.noteId >= #categories[settings.categoryId + 1].instruments[settings.instrumentId + 1].notes then
         settings.noteId = 0
     end
     return settings

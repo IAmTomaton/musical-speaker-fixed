@@ -1,8 +1,6 @@
 --[[ Generated with https://github.com/TypeScriptToLua/TypeScriptToLua ]]
 require("lualib_bundle");
 local ____exports = {}
-local ____sounds = require("script.sounds")
-local programmableSpeakerInstruments = ____sounds.programmableSpeakerInstruments
 local util = require("util")
 local emptyWires = {wire = {}, shadow = {}}
 local baseSpeaker = data.raw["programmable-speaker"]["programmable-speaker"]
@@ -15,7 +13,7 @@ notePlayer.collision_mask = {}
 notePlayer.collision_box = nil
 notePlayer.energy_source = baseSpeaker.energy_source
 notePlayer.energy_usage_per_tick = baseSpeaker.energy_usage_per_tick
-notePlayer.instruments = programmableSpeakerInstruments
+notePlayer.soundDataTable = {}
 if not ____debug then
     notePlayer = __TS__ObjectAssign(
         {},
